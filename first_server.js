@@ -6,7 +6,32 @@ function load_album_list(callback){
         if(err){
             callback(err);
         }else{
-            callback(null, files);
+            let only_dirs = [];
+            
+            // for(let i = 0; i < files.length; i++){
+            //     fs.stat('albums/'+files[i], (err,stats)=>{
+            //        if(stats.isDirectory()){
+            //             only_dirs.push(files[i]);
+            //         }
+            //     })
+
+            // }
+            // callback(null, only_dirs);
+
+            let iterator = (index) => {
+                if(index === files.length){
+                    callback(null, only_dirs);
+                    return;
+                }
+                fs.stat('albums/'+files[index],(err, stats)=>{
+                    if(stats.isDirectory()){
+                        only_dirs.push(files[index]);
+                    }
+                    iterator(index + 1);
+                });
+            }
+            iterator(0);
+
         }
     });
 }
@@ -33,4 +58,6 @@ function process_request(req,res){
 }
 
 const s = http.createServer(process_request).listen(8080);
+
+//
 
