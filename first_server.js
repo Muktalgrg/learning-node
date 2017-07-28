@@ -42,10 +42,12 @@ function load_album(album_name, page, page_size, callback){
 
             let iterator = (index) => {
                 if(index === files.length){
+                    // adding page support
                     const start = page * page_size;
                     const output = only_files.slice(start, start + page_size);
+                    
                     let obj = { short_name: album_name.substr(1),
-                                 photos: only_files};
+                                 photos: output};
                     callback(null, obj);
                     return;
                 }
@@ -68,7 +70,7 @@ function handle_incoming_request(req,res){
     const core_url = req.parsed_url.pathname; // everything infront of ?
     console.log("INCOMING REQUEST : "+req.method+"\nURL"+core_url);
 
-    if( req.url === '/albums.json'){
+    if( core_url === '/albums.json'){
         handle_load_album_list(req, res);
         
     }else if(core_url.substr(0,7) == '/albums'
@@ -120,8 +122,17 @@ function handle_load_album_list(req, res){
 }
 
 function handle_load_album(req, res){
+    let getp = req.parsed_url.query;
+    let page_num = getp.page ? parseInt(getp.page) -1 : 0;
+    let page_size = getp.page_size? parseInt(getp.page_size): 1000;
+
+    if( isNaN(page_num)){
+        page_num = 0;
+    }
+    if(isNaN(page_size)) page_size = 1000;
+
     const core_url = req.parsed_url.pathname;
-    load_album(core_url.substr(7,(core_url.length - 12)/* /albums/australia.json whole - (.json+/albums) */ ),(err, photos)=>{
+    load_album(core_url.substr(7,(core_url.length - 12) ),page_num,page_size,(err, photos)=>{
                 if(err){
                     send_failure(res, 500, err);
                     
