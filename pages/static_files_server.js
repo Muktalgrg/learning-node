@@ -22,7 +22,7 @@ function server_static_file(filename, res){
     let ct = content_type_path(filename);
 
     res.writeHead(200, {'Content-Type':ct});
-    res.pipe(res);
+    rs.pipe(res);
 
     /*
     rs.on('readable', ()=>{
